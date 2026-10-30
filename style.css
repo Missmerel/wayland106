@@ -1,0 +1,252 @@
+/* ==========================================
+   GLOBAL VARIABLES & RESET
+   ========================================== */
+:root {
+  --green: #00ff66;
+  --cyan: #00e5ff;
+  --red: #ff3b3b;
+  --bg: #000;
+  --dim: #0a3d1f;
+  --panel: rgba(0, 15, 5, 0.85);
+  --border: rgba(0, 255, 102, 0.3);
+  --glow: 0 0 10px rgba(0, 255, 102, 0.4);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--green);
+  font-family: "Courier New", monospace;
+  overflow: hidden;
+  height: 100vh;
+}
+
+#rain { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+/* ==========================================
+   MAIN LAYOUT
+   ========================================== */
+.wrap {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column;
+  height: 100%; max-width: 1000px;
+  margin: 0 auto; padding: 24px;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  box-shadow: 0 0 40px rgba(0,0,0,0.9);
+  text-shadow: 0 0 5px rgba(0,255,102,0.5);
+}
+
+#app-title { font-size: 20px; letter-spacing: 6px; margin-bottom: 4px; font-weight: normal; }
+#app-subtitle { color: var(--dim); font-size: 11px; letter-spacing: 4px; margin-bottom: 20px; }
+
+/* ==========================================
+   TOP BAR
+   ========================================== */
+#control-bar {
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+  padding: 12px 16px; margin-bottom: 16px;
+  background: rgba(0, 20, 8, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.label {
+  color: #ffffff !important; /* Forces "OPERATOR", "ROOM", "MSG" to be white */
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px rgba(255,255,255,0.3);
+}
+
+.count {
+  color: #ffffff !important; /* Forces the message count to be white */
+  font-weight: bold;
+}
+
+/* Also make the E2EE ACTIVE subtitle white */
+#app-subtitle {
+  color: #ffffff !important;
+  opacity: 0.8;
+  letter-spacing: 3px;
+}
+
+#current-user {
+  background: rgba(0, 229, 255, 0.15);
+  color: var(--cyan);
+  border: 1px solid var(--cyan);
+  border-radius: 4px;
+  padding: 4px 10px;
+  letter-spacing: 2px;
+}
+
+/* ==========================================
+   BUTTONS & INPUTS
+   ========================================== */
+.btn {
+  background: transparent; color: var(--green);
+  border: 1px solid var(--green); border-radius: 8px;
+  padding: 8px 16px; cursor: pointer; letter-spacing: 2px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+.btn:hover { background: var(--green); color: #000; box-shadow: var(--glow); }
+.btn.danger { color: var(--red); border-color: var(--red); }
+.btn.danger:hover { background: var(--red); color: #000; }
+.btn.outline { color: var(--dim); border-color: var(--dim); text-decoration: none; font-size: 12px; margin-left: auto; }
+.btn.outline:hover { color: var(--red); border-color: var(--red); background: transparent; }
+
+.input-field {
+  background: rgba(0,0,0,0.8); color: var(--green);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px; font-size: 16px; font-family: inherit; outline: none;
+}
+.input-field:focus { border-color: var(--green); box-shadow: var(--glow); }
+#room-input { padding: 6px 10px; flex: 0 0 120px; color: var(--green); }
+
+/* ==========================================
+   CHAT FEED
+   ========================================== */
+#feed {
+  flex: 1; overflow-y: auto;
+  background: rgba(0, 10, 4, 0.7);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px; margin-bottom: 16px;
+}
+#feed::-webkit-scrollbar { width: 6px; }
+#feed::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 4px; }
+
+/* ==========================================
+   MESSAGES
+   ========================================== */
+.msg {
+  margin-bottom: 16px; padding: 14px 18px;
+  background: rgba(0, 20, 8, 0.5);
+  border-left: 2px solid var(--dim);
+  border-radius: 0 8px 8px 0;
+  transition: background 0.2s;
+}
+.msg-me { border-left-color: var(--cyan); background: rgba(0, 20, 25, 0.6); }
+
+/* FORCE VISIBILITY ON HEADERS */
+.msg-head {
+  display: flex; gap: 10px; font-size: 12px; margin-bottom: 8px;
+}
+.msg-sender { color: var(--green); font-size: 13px; }
+.msg-me .msg-sender { color: var(--cyan); }
+
+/* FORCE TIMESTAMPS TO BE VISIBLE WHITE */
+.msg-time, .msg-id {
+  color: #ffffff;
+  opacity: 0.8;
+}
+
+/* FORCE BODY TO BE BRIGHT WHITE */
+.msg-body {
+  font-size: 17px;
+  color: #ffffff;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* FORCE HASH TO BE GREEN */
+.msg-footer {
+  font-size: 11px;
+  color: #009933;
+  margin-top: 12px;
+  word-break: break-all;
+}
+.hash-label { color: var(--green); }
+.hash-status.ok { color: var(--green); font-weight: bold; margin-left: 8px; }
+.hash-status.bad { color: var(--red); font-weight: bold; margin-left: 8px; }
+
+/* ==========================================
+   TYPING & STATUS
+   ========================================== */
+.typing-text { color: var(--green); font-size: 13px; min-height: 16px; margin-bottom: 6px; }
+.status-text { font-size: 11px; margin-top: 10px; color: var(--green); }
+.status-text.err { color: var(--red); }
+
+/* ==========================================
+   NUCLEAR TIMER & OVERLAY
+   ========================================== */
+#nuke-timer {
+  position: fixed; top: 24px; right: 24px; z-index: 100;
+  padding: 12px 20px; font-size: 20px;
+  color: var(--red); background: rgba(20, 0, 0, 0.9);
+  border: 1px solid var(--red); border-radius: 8px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 10px rgba(255,59,59,0.4); } 50% { box-shadow: 0 0 30px rgba(255,59,59,0.8); } }
+
+#infection-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  display: none; flex-direction: column;
+  justify-content: center; align-items: center;
+  background: #000; color: var(--red); text-align: center;
+}
+.skull { font-size: 80px; margin-bottom: 20px; }
+.overlay-title { font-size: 50px; letter-spacing: 10px; animation: glitch 0.5s infinite; }
+.overlay-text { color: var(--green); letter-spacing: 4px; margin-top: 20px; }
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-4px, 4px); color: var(--cyan); }
+  40% { transform: translate(-4px, -4px); }
+  60% { transform: translate(4px, 4px); color: #fff; }
+  80% { transform: translate(4px, -4px); }
+  100% { transform: translate(0); }
+}
+
+/* ==========================================
+   TEXT HIGHLIGHT SELECTION
+   ========================================== */
+::selection {
+  background: #005522 !important;
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+/* ==========================================
+   FINAL POLISH & ANIMATIONS
+   ========================================== */
+
+/* Custom Matrix Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.8);
+  border-left: 1px solid rgba(0, 255, 102, 0.2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--dim);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+}
+
+/* New Message Entry Animation */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msg {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Typewriter Cursor */
+.typewriter-cursor::after {
+  content: '█';
+  color: var(--green);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
